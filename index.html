@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>沖繩極限攻略 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #F0F2F5; -webkit-tap-highlight-color: transparent; padding-bottom: 80px; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); transition: all 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .tag-food { background-color: #FCE8E6; color: #C5221F; font-weight: bold; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; }
+        .tag-transport { background-color: #E8F0FE; color: #1967D2; font-weight: bold; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; }
+        .tag-spot { background-color: #E6F4EA; color: #137333; font-weight: bold; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; }
+        .nav-item.active { color: #1A73E8; }
+        .nav-item.active span { color: #1A73E8; }
+        .weather-badge { font-size: 0.8rem; display: flex; align-items: center; gap: 4px; color: #5F6368; }
+        /* PWA Safe Area */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    </style>
+</head>
+<body>
+
+    <header class="fixed top-0 w-full bg-white z-50 shadow-sm px-4 py-3 flex justify-between items-center" style="padding-top: max(12px, env(safe-area-inset-top));">
+        <div>
+            <h1 class="text-xl font-bold text-gray-800">沖繩極限攻略</h1>
+            <p class="text-xs text-gray-500">Day <span id="currentDayDisplay">1</span> • 剩餘預算 ¥<span id="headerBudget"></span></p>
+        </div>
+        <div id="weatherDisplay" class="bg-blue-50 px-3 py-1 rounded-full text-blue-600 text-sm font-medium flex items-center">
+            <span class="material-icons-round text-base mr-1">wb_sunny</span> 24°C
+        </div>
+    </header>
+
+    <main class="container mx-auto max-w-md px-4 mt-20" id="appContent">
+        </main>
+
+    <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around py-2 z-50 pb-safe">
+        <button onclick="switchTab('itinerary')" class="nav-item active flex flex-col items-center w-1/3 text-gray-500">
+            <span class="material-icons-round mb-1">map</span>
+            <span class="text-xs">行程</span>
+        </button>
+        <button onclick="switchTab('tools')" class="nav-item flex flex-col items-center w-1/3 text-gray-500">
+            <span class="material-icons-round mb-1">inventory_2</span>
+            <span class="text-xs">資訊</span>
+        </button>
+        <button onclick="switchTab('budget')" class="nav-item flex flex-col items-center w-1/3 text-gray-500">
+            <span class="material-icons-round mb-1">account_balance_wallet</span>
+            <span class="text-xs">記帳</span>
+        </button>
+    </nav>
+
+    <script>
+        // --- 1. 資料庫 (行程 Data) ---
+        const tripData = {
+            startDate: "2026-04-24",
+            budget: 80000,
+            travelers: 2,
+            days: [
+                {
+                    day: 1, date: "4/24 (五)", location: "那霸銘苅", weather: "多雲",
+                    stops: [
+                        { time: "17:00", title: "抵達那霸", type: "transport", icon: "directions_car", note: "搭計程車直奔 Hotel Coco (約¥1800)", coords: "Hotel Coco Shintoshin" },
+                        { time: "18:30", title: "Check-in", type: "hotel", icon: "hotel", note: "確認微波爐與簡易廚房設施", coords: "Hotel Coco Shintoshin" },
+                        { time: "19:00", title: "Union 超市補給", type: "food", icon: "shopping_cart", note: "必買：2L水(¥98)、特價便當、明日早餐。晚餐就在這解決。", coords: "Union Mekaru" }
+                    ]
+                },
+                {
+                    day: 2, date: "4/25 (六)", location: "那霸市區", weather: "晴時多雲",
+                    stops: [
+                        { time: "09:30", title: "波上宮 & 海灘", type: "spot", icon: "temple_buddhist", note: "搭單軌至縣廳前轉計程車。必去：海灘踩水。", coords: "Naminoue Shrine" },
+                        { time: "12:30", title: "午餐：Gusto", type: "food", icon: "restaurant", note: "取代牛排。推薦：平日午餐定食(¥600)。", coords: "Gusto Naha Shintoshin" },
+                        { time: "17:30", title: "晚餐：Hotto Motto", type: "food", icon: "takeout_dining", note: "外帶海苔便當(¥390)回飯店吃。", coords: "Hotto Motto Makabi" }
+                    ]
+                },
+                {
+                    day: 3, date: "4/26 (日)", location: "沖繩中部", weather: "晴朗",
+                    stops: [
+                        { time: "09:30", title: "前往兒童王國", type: "transport", icon: "directions_bus", note: "古島站搭90號公車(¥3000來回)。", coords: "Furujima Station" },
+                        { time: "10:40", title: "沖繩兒童王國", type: "spot", icon: "attractions", note: "自備飯糰午餐。必去：Wonder Museum。", coords: "Okinawa Zoo & Museum" },
+                        { time: "16:00", title: "晚餐：Sukiya", type: "food", icon: "restaurant", note: "古島站旁。必吃：牛丼中碗(¥430)。", coords: "Sukiya Naha Shintoshin" }
+                    ]
+                },
+                {
+                    day: 4, date: "4/27 (一)", location: "沖繩北部", weather: "陰天",
+                    stops: [
+                        { time: "08:20", title: "水族館長征", type: "transport", icon: "directions_bus", note: "古島站搭Yanbaru Express(¥6000來回)。", coords: "Furujima Station" },
+                        { time: "11:30", title: "美麗海水族館", type: "spot", icon: "water_drop", note: "午餐：戶外吃自備麵包。必看：黑潮之海餵食秀。", coords: "Okinawa Churaumi Aquarium" },
+                        { time: "19:30", title: "晚餐：麵天烏龍麵", type: "food", icon: "ramen_dining", note: "飯店隔壁30秒。必吃：熱烏龍麵(¥500)。", coords: "Menten Udon Naha" }
+                    ]
+                },
+                {
+                    day: 5, date: "4/28 (二)", location: "南城市", weather: "雷陣雨",
+                    stops: [
+                        { time: "09:00", title: "早餐", type: "food", icon: "breakfast_dining", note: "Union買的優格/香蕉。", coords: "" },
+                        { time: "11:00", title: "Costco 南城", type: "food", icon: "shopping_cart", note: "公車轉乘。必吃：熱狗堡套餐(¥180)！省錢救星。", coords: "Costco Okinawa Nanjo" },
+                        { time: "14:30", title: "文化王國", type: "spot", icon: "nature_people", note: "搭計程車前往。必看：玉泉洞。", coords: "Okinawa World" },
+                        { time: "18:00", title: "晚餐：超市半價", type: "food", icon: "celebration", note: "San-A Main Place 19:30後半價熟食。", coords: "San-A Naha Main Place" }
+                    ]
+                },
+                {
+                    day: 6, date: "4/29 (三)", location: "搬家日", weather: "多雲",
+                    stops: [
+                        { time: "10:00", title: "搬家至 Almont", type: "hotel", icon: "luggage", note: "走路10分鐘。寄放行李。", coords: "Almont Hotel Naha-Omoromachi" },
+                        { time: "11:00", title: "早午餐：Kinjo Bakery", type: "food", icon: "bakery_dining", note: "儀保站。必吃：麵包吃到飽(¥800)抵午餐。", coords: "Kinjo Bakery" },
+                        { time: "15:00", title: "Check-in & 泡湯", type: "hotel", icon: "bathtub", note: "享受大浴場。", coords: "Almont Hotel Naha-Omoromachi" }
+                    ]
+                },
+                {
+                    day: 7, date: "4/30 (四)", location: "美國村", weather: "晴朗",
+                    stops: [
+                        { time: "10:00", title: "搬家至 Comfort", type: "hotel", icon: "luggage", note: "縣廳前站。含免費早餐。", coords: "Comfort Hotel Naha Prefectural Office" },
+                        { time: "11:00", title: "美國村", type: "spot", icon: "storefront", note: "縣廳北口搭120號公車直達。", coords: "American Village Okinawa" },
+                        { time: "18:00", title: "晚餐：松屋", type: "food", icon: "rice_bowl", note: "縣廳前附近。推薦：燒肉定食(¥600)。", coords: "Matsuya Naha Kumoji" }
+                    ]
+                },
+                {
+                    day: 8, date: "5/01 (五)", location: "歸途", weather: "晴朗",
+                    stops: [
+                        { time: "09:00", title: "早餐", type: "food", icon: "coffee", note: "Comfort Hotel 免費早餐。", coords: "Comfort Hotel Naha Prefectural Office" },
+                        { time: "10:00", title: "前往機場", type: "transport", icon: "flight_takeoff", note: "單軌直送(¥270)。", coords: "Naha Airport" }
+                    ]
+                }
+            ],
+            info: {
+                flights: "去程: 星宇 JX870 (09:30-12:00) | 回程: 星宇 JX871 (13:00-15:30)", // 範例
+                hotels: [
+                    {name: "Hotel Coco", address: "那霸市銘苅 1-2-10", tel: "+81-98-XXX-XXXX"},
+                    {name: "Almont Hotel", address: "那霸市Omoromachi 4-3-8", tel: "+81-98-XXX-XXXX"},
+                    {name: "Comfort Hotel", address: "那霸市久茂地 1-3-11", tel: "+81-98-XXX-XXXX"}
+                ],
+                emergency: "急救: 119 | 警察: 110 | 駐日代表處: +81-3-3280-7111"
+            }
+        };
+
+        // --- 2. 邏輯處理 (Logic) ---
+        let activeTab = 'itinerary';
+        let currentDayIdx = 0;
+        
+        // 預算管理 (LocalStorage)
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+        function renderApp() {
+            const container = document.getElementById('appContent');
+            container.innerHTML = '';
+
+            if (activeTab === 'itinerary') renderItinerary(container);
+            else if (activeTab === 'tools') renderTools(container);
+            else if (activeTab === 'budget') renderBudget(container);
+
+            updateHeader();
+            updateNav();
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            renderApp();
+        }
+
+        function updateHeader() {
+            // Update Day Display
+            document.getElementById('currentDayDisplay').innerText = tripData.days[currentDayIdx].date;
+            
+            // Update Weather
+            document.getElementById('weatherDisplay').innerHTML = `
+                <span class="material-icons-round text-base mr-1">wb_sunny</span> ${tripData.days[currentDayIdx].weather}
+            `;
+
+            // Update Budget Header
+            const totalSpent = expenses.reduce((sum, item) => sum + item.amount, 0);
+            const remaining = tripData.budget - totalSpent;
+            document.getElementById('headerBudget').innerText = remaining.toLocaleString();
+        }
+
+        function updateNav() {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if(activeTab === 'itinerary') document.querySelectorAll('.nav-item')[0].classList.add('active');
+            if(activeTab === 'tools') document.querySelectorAll('.nav-item')[1].classList.add('active');
+            if(activeTab === 'budget') document.querySelectorAll('.nav-item')[2].classList.add('active');
+        }
+
+        // --- 渲染：行程 (Itinerary) ---
+        function renderItinerary(container) {
+            // Day Select Scroll
+            let dayNavHtml = '<div class="flex overflow-x-auto gap-2 pb-4 mb-2 no-scrollbar">';
+            tripData.days.forEach((day, idx) => {
+                const activeClass = idx === currentDayIdx ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200';
+                dayNavHtml += `<button onclick="currentDayIdx=${idx}; renderApp()" class="${activeClass} px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors">${day.date}</button>`;
+            });
+            dayNavHtml += '</div>';
+
+            let contentHtml = dayNavHtml + '<div class="space-y-4">';
+            
+            tripData.days[currentDayIdx].stops.forEach(stop => {
+                // AI Highlight Logic
+                let processedNote = stop.note;
+                processedNote = processedNote.replace(/(必吃|推薦|必去|必看|必買)/g, '<span class="tag-food">$1</span>');
+                processedNote = processedNote.replace(/(公車|單軌|計程車|Yanbaru Express)/g, '<span class="tag-transport">$1</span>');
+                processedNote = processedNote.replace(/(省錢|CP值)/g, '<span class="tag-spot">$1</span>');
+
+                // Map Link
+                const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stop.coords)}`;
+
+                contentHtml += `
+                <div class="card p-4 flex gap-4">
+                    <div class="flex flex-col items-center pt-1 w-12 flex-shrink-0">
+                        <span class="text-sm font-bold text-gray-500">${stop.time}</span>
+                        <div class="h-full w-0.5 bg-gray-200 mt-2 mb-2"></div>
+                        <div class="bg-blue-100 text-blue-600 rounded-full p-1">
+                            <span class="material-icons-round text-sm">${stop.icon}</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 pb-2">
+                        <h3 class="text-lg font-bold text-gray-800">${stop.title}</h3>
+                        <p class="text-gray-600 text-sm mt-1 leading-relaxed">${processedNote}</p>
+                        
+                        ${stop.coords ? `
+                        <a href="${mapLink}" target="_blank" class="mt-3 inline-flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                            <span class="material-icons-round text-sm">near_me</span> 導航
+                        </a>` : ''}
+                    </div>
+                </div>`;
+            });
+            contentHtml += '</div>';
+            container.innerHTML = contentHtml;
+        }
+
+        // --- 渲染：工具 (Tools) ---
+        function renderTools(container) {
+            container.innerHTML = `
+                <h2 class="text-xl font-bold mb-4 text-gray-800">旅遊錦囊</h2>
+                
+                <div class="card p-4 mb-4 border-l-4 border-blue-500">
+                    <h3 class="font-bold flex items-center gap-2"><span class="material-icons-round">flight</span> 航班資訊</h3>
+                    <p class="text-sm text-gray-600 mt-2">${tripData.info.flights}</p>
+                </div>
+
+                <div class="card p-4 mb-4 border-l-4 border-orange-500">
+                    <h3 class="font-bold flex items-center gap-2"><span class="material-icons-round">hotel</span> 住宿清單</h3>
+                    <ul class="mt-2 space-y-3">
+                        ${tripData.info.hotels.map(h => `
+                            <li class="text-sm">
+                                <div class="font-bold text-gray-800">${h.name}</div>
+                                <div class="text-gray-500 text-xs">${h.address}</div>
+                                <div class="text-blue-500 text-xs" onclick="window.location.href='tel:${h.tel}'">Tel: ${h.tel}</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <div class="card p-4 mb-4 border-l-4 border-red-500">
+                    <h3 class="font-bold flex items-center gap-2"><span class="material-icons-round">emergency</span> 緊急聯絡</h3>
+                    <p class="text-sm text-gray-600 mt-2">${tripData.info.emergency}</p>
+                </div>
+            `;
+        }
+
+        // --- 渲染：記帳 (Budget) ---
+        function renderBudget(container) {
+            const totalSpent = expenses.reduce((sum, item) => sum + item.amount, 0);
+            const remaining = tripData.budget - totalSpent;
+            const percent = Math.min(100, (totalSpent / tripData.budget) * 100);
+            const barColor = percent > 90 ? 'bg-red-500' : (percent > 70 ? 'bg-yellow-500' : 'bg-green-500');
+
+            container.innerHTML = `
+                <div class="card p-6 mb-6 text-center">
+                    <p class="text-gray-500 text-sm">剩餘預算</p>
+                    <h2 class="text-4xl font-bold text-gray-800 mt-1">¥${remaining.toLocaleString()}</h2>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
+                        <div class="${barColor} h-2.5 rounded-full" style="width: ${percent}%"></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">總預算 ¥${tripData.budget.toLocaleString()} • 已用 ¥${totalSpent.toLocaleString()}</p>
+                </div>
+
+                <div class="card p-4 mb-6">
+                    <h3 class="font-bold mb-3">新增支出</h3>
+                    <form onsubmit="addExpense(event)" class="flex gap-2">
+                        <input type="text" id="expDesc" placeholder="項目 (如: 便當)" class="border rounded px-3 py-2 w-full text-sm" required>
+                        <input type="number" id="expAmount" placeholder="金額" class="border rounded px-3 py-2 w-24 text-sm" required>
+                        <button type="submit" class="bg-blue-600 text-white rounded px-4 py-2 material-icons-round">add</button>
+                    </form>
+                </div>
+
+                <h3 class="font-bold mb-3 px-1">支出紀錄</h3>
+                <div class="space-y-2 pb-20">
+                    ${expenses.map((exp, idx) => `
+                        <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center border border-gray-100">
+                            <div>
+                                <div class="font-medium text-gray-800">${exp.desc}</div>
+                                <div class="text-xs text-gray-400">${exp.date}</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-gray-700">-¥${exp.amount}</span>
+                                <button onclick="deleteExpense(${idx})" class="text-gray-300 hover:text-red-500 material-icons-round text-sm">delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${expenses.length === 0 ? '<p class="text-center text-gray-400 text-sm py-4">目前沒有支出紀錄</p>' : ''}
+                </div>
+            `;
+        }
+
+        function addExpense(e) {
+            e.preventDefault();
+            const desc = document.getElementById('expDesc').value;
+            const amount = parseInt(document.getElementById('expAmount').value);
+            if (!desc || !amount) return;
+
+            const newExp = {
+                desc, amount, date: new Date().toLocaleDateString()
+            };
+            expenses.unshift(newExp); // Add to top
+            localStorage.setItem('expenses', JSON.stringify(expenses)); // Save Offline
+            renderBudget(document.getElementById('appContent'));
+            updateHeader();
+        }
+
+        function deleteExpense(index) {
+            if(confirm('確定刪除此筆紀錄？')) {
+                expenses.splice(index, 1);
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                renderBudget(document.getElementById('appContent'));
+                updateHeader();
+            }
+        }
+
+        // Init
+        renderApp();
+    </script>
+</body>
+</html>
