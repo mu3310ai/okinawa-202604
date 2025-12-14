@@ -55,86 +55,86 @@
 
     <script>
         // --- 1. 資料庫 (行程 Data) ---
-        const tripData = {
-            startDate: "2026-04-24",
-            budget: 80000,
-            travelers: 2,
-            days: [
-                {
-                    day: 1, date: "4/24 (五)", location: "那霸銘苅", weather: "多雲",
-                    stops: [
-                        { time: "17:00", title: "抵達那霸", type: "transport", icon: "directions_car", note: "搭計程車直奔 Hotel Coco (約¥1800)", coords: "Hotel Coco Shintoshin" },
-                        { time: "18:30", title: "Check-in", type: "hotel", icon: "hotel", note: "確認微波爐與簡易廚房設施", coords: "Hotel Coco Shintoshin" },
-                        { time: "19:00", title: "Union 超市補給", type: "food", icon: "shopping_cart", note: "必買：2L水(¥98)、特價便當、明日早餐。晚餐就在這解決。", coords: "Union Mekaru" }
-                    ]
-                },
-                {
-                    day: 2, date: "4/25 (六)", location: "那霸市區", weather: "晴時多雲",
-                    stops: [
-                        { time: "09:30", title: "波上宮 & 海灘", type: "spot", icon: "temple_buddhist", note: "搭單軌至縣廳前轉計程車。必去：海灘踩水。", coords: "Naminoue Shrine" },
-                        { time: "12:30", title: "午餐：Gusto", type: "food", icon: "restaurant", note: "取代牛排。推薦：平日午餐定食(¥600)。", coords: "Gusto Naha Shintoshin" },
-                        { time: "17:30", title: "晚餐：Hotto Motto", type: "food", icon: "takeout_dining", note: "外帶海苔便當(¥390)回飯店吃。", coords: "Hotto Motto Makabi" }
-                    ]
-                },
-                {
-                    day: 3, date: "4/26 (日)", location: "沖繩中部", weather: "晴朗",
-                    stops: [
-                        { time: "09:30", title: "前往兒童王國", type: "transport", icon: "directions_bus", note: "古島站搭90號公車(¥3000來回)。", coords: "Furujima Station" },
-                        { time: "10:40", title: "沖繩兒童王國", type: "spot", icon: "attractions", note: "自備飯糰午餐。必去：Wonder Museum。", coords: "Okinawa Zoo & Museum" },
-                        { time: "16:00", title: "晚餐：Sukiya", type: "food", icon: "restaurant", note: "古島站旁。必吃：牛丼中碗(¥430)。", coords: "Sukiya Naha Shintoshin" }
-                    ]
-                },
-                {
-                    day: 4, date: "4/27 (一)", location: "沖繩北部", weather: "陰天",
-                    stops: [
-                        { time: "08:20", title: "水族館長征", type: "transport", icon: "directions_bus", note: "古島站搭Yanbaru Express(¥6000來回)。", coords: "Furujima Station" },
-                        { time: "11:30", title: "美麗海水族館", type: "spot", icon: "water_drop", note: "午餐：戶外吃自備麵包。必看：黑潮之海餵食秀。", coords: "Okinawa Churaumi Aquarium" },
-                        { time: "19:30", title: "晚餐：麵天烏龍麵", type: "food", icon: "ramen_dining", note: "飯店隔壁30秒。必吃：熱烏龍麵(¥500)。", coords: "Menten Udon Naha" }
-                    ]
-                },
-                {
-                    day: 5, date: "4/28 (二)", location: "南城市", weather: "雷陣雨",
-                    stops: [
-                        { time: "09:00", title: "早餐", type: "food", icon: "breakfast_dining", note: "Union買的優格/香蕉。", coords: "" },
-                        { time: "11:00", title: "Costco 南城", type: "food", icon: "shopping_cart", note: "公車轉乘。必吃：熱狗堡套餐(¥180)！省錢救星。", coords: "Costco Okinawa Nanjo" },
-                        { time: "14:30", title: "文化王國", type: "spot", icon: "nature_people", note: "搭計程車前往。必看：玉泉洞。", coords: "Okinawa World" },
-                        { time: "18:00", title: "晚餐：超市半價", type: "food", icon: "celebration", note: "San-A Main Place 19:30後半價熟食。", coords: "San-A Naha Main Place" }
-                    ]
-                },
-                {
-                    day: 6, date: "4/29 (三)", location: "搬家日", weather: "多雲",
-                    stops: [
-                        { time: "10:00", title: "搬家至 Almont", type: "hotel", icon: "luggage", note: "走路10分鐘。寄放行李。", coords: "Almont Hotel Naha-Omoromachi" },
-                        { time: "11:00", title: "早午餐：Kinjo Bakery", type: "food", icon: "bakery_dining", note: "儀保站。必吃：麵包吃到飽(¥800)抵午餐。", coords: "Kinjo Bakery" },
-                        { time: "15:00", title: "Check-in & 泡湯", type: "hotel", icon: "bathtub", note: "享受大浴場。", coords: "Almont Hotel Naha-Omoromachi" }
-                    ]
-                },
-                {
-                    day: 7, date: "4/30 (四)", location: "美國村", weather: "晴朗",
-                    stops: [
-                        { time: "10:00", title: "搬家至 Comfort", type: "hotel", icon: "luggage", note: "縣廳前站。含免費早餐。", coords: "Comfort Hotel Naha Prefectural Office" },
-                        { time: "11:00", title: "美國村", type: "spot", icon: "storefront", note: "縣廳北口搭120號公車直達。", coords: "American Village Okinawa" },
-                        { time: "18:00", title: "晚餐：松屋", type: "food", icon: "rice_bowl", note: "縣廳前附近。推薦：燒肉定食(¥600)。", coords: "Matsuya Naha Kumoji" }
-                    ]
-                },
-                {
-                    day: 8, date: "5/01 (五)", location: "歸途", weather: "晴朗",
-                    stops: [
-                        { time: "09:00", title: "早餐", type: "food", icon: "coffee", note: "Comfort Hotel 免費早餐。", coords: "Comfort Hotel Naha Prefectural Office" },
-                        { time: "10:00", title: "前往機場", type: "transport", icon: "flight_takeoff", note: "單軌直送(¥270)。", coords: "Naha Airport" }
-                    ]
-                }
-            ],
-            info: {
-                flights: "去程: 星宇 JX870 (09:30-12:00) | 回程: 星宇 JX871 (13:00-15:30)", // 範例
-                hotels: [
-                    {name: "Hotel Coco", address: "那霸市銘苅 1-2-10", tel: "+81-98-XXX-XXXX"},
-                    {name: "Almont Hotel", address: "那霸市Omoromachi 4-3-8", tel: "+81-98-XXX-XXXX"},
-                    {name: "Comfort Hotel", address: "那霸市久茂地 1-3-11", tel: "+81-98-XXX-XXXX"}
-                ],
-                emergency: "急救: 119 | 警察: 110 | 駐日代表處: +81-3-3280-7111"
-            }
-        };
+   const tripData = {
+    startDate: "2026-04-24",
+    budget: 80000,
+    travelers: 2,
+    days: [
+        {
+            day: 1, date: "4/24 (四)", location: "海上巡航", weather: "海風",
+            stops: [
+                { time: "17:00", title: "基隆出發", type: "transport", icon: "directions_boat", note: "搭乘 Costa Serena 郵輪。享受船上設施與晚餐 (已含在船票)。", coords: "" }
+            ]
+        },
+        {
+            day: 2, date: "4/25 (五)", location: "抵達那霸", weather: "多雲",
+            stops: [
+                { time: "17:00", title: "抵達那霸港", type: "transport", icon: "anchor", note: "下船通關。目標：18:00前上計程車。", coords: "Naha Cruise Terminal" },
+                { time: "18:00", title: "Check-in", type: "hotel", icon: "local_taxi", note: "搭計程車直奔 Hotel Coco (入住4晚)。地址：銘苅 1-2-10。", coords: "Hotel Coco Shintoshin" },
+                { time: "19:00", title: "Union 超市補給", type: "food", icon: "shopping_cart", note: "必買：2L水、特價便當、明日飯糰。這是今天的晚餐。", coords: "Union Mekaru" }
+            ]
+        },
+        {
+            day: 3, date: "4/26 (六)", location: "沖繩中部", weather: "晴時多雲",
+            stops: [
+                { time: "09:30", title: "前往兒童王國", type: "transport", icon: "directions_bus", note: "古島站搭90號公車(¥3000來回)。", coords: "Furujima Station" },
+                { time: "10:40", title: "沖繩兒童王國", type: "spot", icon: "attractions", note: "自備飯糰午餐。必去：Wonder Museum。", coords: "Okinawa Zoo & Museum" },
+                { time: "16:00", title: "晚餐：Hamazushi", type: "food", icon: "restaurant", note: "古島站旁迴轉壽司。必吃：平日一盤¥90起 (預算¥3000)。", coords: "Hamazushi Furujima" }
+            ]
+        },
+        {
+            day: 4, date: "4/27 (日)", location: "沖繩北部", weather: "晴朗",
+            stops: [
+                { time: "08:20", title: "水族館長征", type: "transport", icon: "directions_bus", note: "古島站搭Yanbaru Express(¥6000來回)。", coords: "Furujima Station" },
+                { time: "11:30", title: "美麗海水族館", type: "spot", icon: "water_drop", note: "午餐：戶外吃自備麵包。必看：黑潮之海餵食秀。", coords: "Okinawa Churaumi Aquarium" },
+                { time: "19:30", title: "晚餐：麵天烏龍麵", type: "food", icon: "ramen_dining", note: "飯店隔壁30秒。必吃：熱烏龍麵(¥500)。", coords: "Menten Udon Naha" }
+            ]
+        },
+        {
+            day: 5, date: "4/28 (一)", location: "南城市", weather: "陰天",
+            stops: [
+                { time: "09:00", title: "早餐", type: "food", icon: "breakfast_dining", note: "Union買的優格/香蕉。", coords: "" },
+                { time: "11:00", title: "Costco 南城", type: "food", icon: "shopping_cart", note: "公車轉乘。必吃：熱狗堡套餐(¥180)！省錢救星。", coords: "Costco Okinawa Nanjo" },
+                { time: "14:30", title: "文化王國", type: "spot", icon: "nature_people", note: "搭計程車前往。必看：玉泉洞。", coords: "Okinawa World" },
+                { time: "18:00", title: "晚餐：超市半價", type: "food", icon: "celebration", note: "San-A Main Place 19:30後半價熟食。", coords: "San-A Naha Main Place" }
+            ]
+        },
+        {
+            day: 6, date: "4/29 (二)", location: "牛排日", weather: "多雲",
+            stops: [
+                { time: "10:00", title: "退房 & 移動", type: "transport", icon: "luggage", note: "推行李走路8分鐘至 Apple Town。", coords: "Naha Apple Town" },
+                { time: "11:30", title: "午餐：Jumbo Steak Han's", type: "food", icon: "restaurant", note: "必吃：牛排自助吧吃到飽 (Day 5省下的錢花在這)。", coords: "JUMBO STEAK HAN'S Apple Town" },
+                { time: "14:00", title: "入住 Almont", type: "hotel", icon: "hotel", note: "走路5分鐘 Check-in。晚上享受大浴場。", coords: "Almont Hotel Naha-Omoromachi" },
+                { time: "15:30", title: "首里城散步", type: "spot", icon: "history_edu", note: "搭單軌去首里城消化午餐。", coords: "Shuri Castle" }
+            ]
+        },
+        {
+            day: 7, date: "4/30 (三)", location: "美國村", weather: "晴朗",
+            stops: [
+                { time: "10:00", title: "搬家至 Comfort", type: "hotel", icon: "luggage", note: "縣廳前站。含免費早餐。", coords: "Comfort Hotel Naha Prefectural Office" },
+                { time: "11:30", title: "早午餐：Kinjo Bakery", type: "food", icon: "bakery_dining", note: "儀保站。必吃：麵包吃到飽(¥800)抵午餐。", coords: "Kinjo Bakery" },
+                { time: "14:00", title: "美國村", type: "spot", icon: "storefront", note: "縣廳北口搭120號公車直達。", coords: "American Village Okinawa" },
+                { time: "18:00", title: "晚餐：松屋", type: "food", icon: "rice_bowl", note: "縣廳前附近。推薦：燒肉定食(¥600)。", coords: "Matsuya Naha Kumoji" }
+            ]
+        },
+        {
+            day: 8, date: "5/01 (四)", location: "返台", weather: "晴朗",
+            stops: [
+                { time: "09:00", title: "早餐", type: "food", icon: "coffee", note: "Comfort Hotel 免費早餐。", coords: "Comfort Hotel Naha Prefectural Office" },
+                { time: "10:00", title: "前往機場", type: "transport", icon: "flight_takeoff", note: "搭乘華航 CI 班機返台。", coords: "Naha Airport" }
+            ]
+        }
+    ],
+    info: {
+        flights: "去程: Costa Serena (04/24 17:00) | 回程: 華航 (05/01)",
+        hotels: [
+            {name: "Hotel Coco (4/25-29)", address: "那霸市銘苅 1-2-10", tel: "請查閱訂單"},
+            {name: "Almont Hotel (4/29-30)", address: "新都心 Apple Town 旁", tel: "請查閱訂單"},
+            {name: "Comfort Hotel (4/30-5/1)", address: "縣廳前站旁", tel: "請查閱訂單"}
+        ],
+        emergency: "急救: 119 | 警察: 110 | 駐日代表處: +81-3-3280-7111"
+    }
+};
 
         // --- 2. 邏輯處理 (Logic) ---
         let activeTab = 'itinerary';
@@ -331,4 +331,5 @@
         renderApp();
     </script>
 </body>
+
 </html>
